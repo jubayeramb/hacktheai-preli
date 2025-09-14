@@ -1,48 +1,51 @@
-const express = require('express');
+import express from 'express';
+import { initializeData } from './src/models/storage.js';
+
+// Import routes
+import membersRouter from './src/routes/members.js';
+import booksRouter from './src/routes/books.js';
+import borrowRouter from './src/routes/borrow.js';
+import returnRouter from './src/routes/return.js';
+import libraryRouter from './src/routes/library.js';
+import reservationsRouter from './src/routes/reservations.js';
+
 const app = express();
 const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(express.json());
 
-// In-memory storage
-const members = new Map();
+// Initialize data
+initializeData();
 
-// POST /api/members - Create a new member
-app.post('/api/members', (req, res) => {
-  const { member_id, name, age } = req.body;
+// Routes
+app.use('/api/members', membersRouter);
+app.use('/api/books', booksRouter);
+app.use('/api/borrow', borrowRouter);
+app.use('/api/return', returnRouter);
+app.use('/api', libraryRouter); // This handles /api/borrowed and /api/overdue
+app.use('/api/reservations', reservationsRouter);
 
-  // Validation
-  if (!member_id || !name || age === undefined) {
-    return res.status(400).json({
-      message: "member_id, name, and age are required"
-    });
-  }
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 
-  if (age < 0 || age > 150) {
-    return res.status(400).json({
-      message: "age must be between 0 and 150"
-    });
-  }
-
-  // Check for duplicate ID
-  if (members.has(member_id)) {
-    return res.status(409).json({
-      message: `member with id: ${member_id} already exists`
-    });
-  }
-
-  // Create new member
-  const newMember = {
-    member_id,
-    name,
-    age,
-    has_borrowed: false
-  };
-
-  members.set(member_id, newMember);
-
-  res.status(201).json(newMember);
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Library Management API',
+    version: '1.0.0',
+    endpoints: {
+      members: '/api/members',
+      books: '/api/books',
+      borrow: '/api/borrow',
+      return: '/api/return',
+      borrowed: '/api/borrowed',
+      overdue: '/api/overdue',
+      reservations: '/api/reservations'
+    }
+  });
 });
 
 app.listen(PORT, () => {

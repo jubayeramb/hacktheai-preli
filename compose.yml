@@ -1,6 +1,8 @@
+version: '3.8'
+
 services:
   express-api:
-    container_name: express-api
+    container_name: library-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -8,4 +10,11 @@ services:
       - "8000:8000"
     environment:
       - NODE_ENV=production
+      - PORT=8000
     restart: unless-stopped
+    networks:
+      - library-network
+
+networks:
+  library-network:
+    driver: bridge
