@@ -1,74 +1,145 @@
-// In-memory storage for all data
-export const members = new Map();
-export const books = new Map();
-export const transactions = new Map();
-export const reservations = new Map();
+// In-memory storage for the voting system
+export const voters = new Map();
+export const candidates = new Map();
+export const votes = new Map();
+export const ballots = new Map();
+export const nullifiers = new Set();
+export const elections = new Map();
+export const privacyBudgets = new Map();
+export const audits = new Map();
+export const voteTimeline = [];
 
-// Sample books data
-const sampleBooks = [
-  { 
-    book_id: 101, 
-    title: "The Great Gatsby", 
-    author: "F. Scott Fitzgerald", 
-    isbn: "978-0-7432-7356-5", 
-    is_available: true, 
-    category: "Classic Literature", 
-    published_date: "1925-04-10", 
-    rating: 4.2, 
-    borrowing_count: 45, 
-    popularity_score: 7.8 
+// ID counters for consistent ID generation
+let voterIdCounter = 1000;
+let candidateIdCounter = 1000;
+let voteIdCounter = 1000;
+
+// Helper functions to generate unique IDs
+export function generateVoterId() {
+  return voterIdCounter++;
+}
+
+export function generateCandidateId() {
+  return candidateIdCounter++;
+}
+
+export function generateVoteId() {
+  return voteIdCounter++;
+}
+
+export function generateId() {
+  return Math.floor(Math.random() * 9000) + 1000;
+}
+
+// Sample data for initial testing
+const sampleVoters = [
+  {
+    voter_id: 1,
+    name: "Alice Johnson",
+    age: 28,
+    has_voted: false,
+    profile_updated: true,
+    registered_at: "2025-01-01T10:00:00Z"
   },
-  { 
-    book_id: 102, 
-    title: "To Kill a Mockingbird", 
-    author: "Harper Lee", 
-    isbn: "978-0-06-112008-4", 
-    is_available: true, 
-    category: "Classic Literature", 
-    published_date: "1960-07-11", 
-    rating: 4.5, 
-    borrowing_count: 67, 
-    popularity_score: 8.2 
+  {
+    voter_id: 2,
+    name: "Bob Smith",
+    age: 35,
+    has_voted: false,
+    profile_updated: false,
+    registered_at: "2025-01-02T11:30:00Z"
   },
-  { 
-    book_id: 103, 
-    title: "1984", 
-    author: "George Orwell", 
-    isbn: "978-0-452-28423-4", 
-    is_available: true, 
-    category: "Dystopian Fiction", 
-    published_date: "1949-06-08", 
-    rating: 4.6, 
-    borrowing_count: 89, 
-    popularity_score: 9.1 
-  },
-  { 
-    book_id: 104, 
-    title: "Pride and Prejudice", 
-    author: "Jane Austen", 
-    isbn: "978-0-14-143951-8", 
-    is_available: true, 
-    category: "Romance", 
-    published_date: "1813-01-28", 
-    rating: 4.3, 
-    borrowing_count: 34, 
-    popularity_score: 7.5 
-  },
-  { 
-    book_id: 105, 
-    title: "The Catcher in the Rye", 
-    author: "J.D. Salinger", 
-    isbn: "978-0-316-76948-0", 
-    is_available: true, 
-    category: "Coming of Age", 
-    published_date: "1951-07-16", 
-    rating: 3.8, 
-    borrowing_count: 23, 
-    popularity_score: 6.9 
+  {
+    voter_id: 3,
+    name: "Carol Brown",
+    age: 42,
+    has_voted: false,
+    profile_updated: true,
+    registered_at: "2025-01-03T09:15:00Z"
   }
 ];
 
-// Initialize sample books
+const sampleCandidates = [
+  {
+    candidate_id: 1,
+    name: "John Doe",
+    party: "Green Party",
+    platform: "Environmental sustainability and renewable energy",
+    registered_at: "2024-12-01T08:00:00Z"
+  },
+  {
+    candidate_id: 2,
+    name: "Jane Roe",
+    party: "Innovation Party",
+    platform: "Technology advancement and digital governance",
+    registered_at: "2024-12-02T10:30:00Z"
+  },
+  {
+    candidate_id: 3,
+    name: "Alex Turner",
+    party: "Unity Coalition",
+    platform: "Social unity and economic equality",
+    registered_at: "2024-12-03T14:20:00Z"
+  }
+];
+
+const sampleElections = [
+  {
+    election_id: "nat-2025",
+    name: "National Election 2025",
+    start_date: "2025-09-10T00:00:00Z",
+    end_date: "2025-09-11T00:00:00Z",
+    status: "active",
+    type: "general"
+  },
+  {
+    election_id: "city-rcv-2025",
+    name: "City Ranked Choice Election 2025",
+    start_date: "2025-09-15T00:00:00Z",
+    end_date: "2025-09-16T00:00:00Z",
+    status: "upcoming",
+    type: "ranked_choice"
+  }
+];
+
+// Initialize voting system data
 export function initializeData() {
-  sampleBooks.forEach(book => books.set(book.book_id, book));
+  // Clear existing data
+  voters.clear();
+  candidates.clear();
+  votes.clear();
+  elections.clear();
+  ballots.clear();
+  audits.clear();
+  privacyBudgets.clear();
+  nullifiers.clear();
+  voteTimeline.length = 0; // Clear array
+
+  // Initialize sample voters
+  sampleVoters.forEach(voter => {
+    voters.set(voter.voter_id, voter);
+    voterIdCounter = Math.max(voterIdCounter, voter.voter_id + 1);
+  });
+
+  // Initialize sample candidates
+  sampleCandidates.forEach(candidate => {
+    candidates.set(candidate.candidate_id, candidate);
+    candidateIdCounter = Math.max(candidateIdCounter, candidate.candidate_id + 1);
+  });
+
+  // Initialize sample elections
+  sampleElections.forEach(election => {
+    elections.set(election.election_id, election);
+  });
+
+  // Initialize privacy budgets for analytics
+  privacyBudgets.set("nat-2025", {
+    epsilon: 2.0,
+    delta: 1e-6,
+    remaining_epsilon: 2.0,
+    queries_count: 0,
+    last_query: null
+  });
+
+  console.log('Voting system data initialized successfully');
 }

@@ -1,8 +1,8 @@
 version: '3.8'
 
 services:
-  express-api:
-    container_name: library-api
+  voting-api:
+    container_name: voting-system-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,8 +13,8 @@ services:
       - PORT=8000
     restart: unless-stopped
     networks:
-      - library-network
+      - voting-network
 
 networks:
-  library-network:
+  voting-network:
     driver: bridge

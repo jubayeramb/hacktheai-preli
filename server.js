@@ -1,13 +1,14 @@
 import express from 'express';
 import { initializeData } from './src/models/storage.js';
 
-// Import routes
-import membersRouter from './src/routes/members.js';
-import booksRouter from './src/routes/books.js';
-import borrowRouter from './src/routes/borrow.js';
-import returnRouter from './src/routes/return.js';
-import libraryRouter from './src/routes/library.js';
-import reservationsRouter from './src/routes/reservations.js';
+// Import voting system routes
+import votersRouter from './src/routes/voters.js';
+import candidatesRouter from './src/routes/candidates.js';
+import votesRouter from './src/routes/votes.js';
+import resultsRouter from './src/routes/results.js';
+import ballotsRouter from './src/routes/ballots.js';
+import analyticsRouter from './src/routes/analytics.js';
+import auditsRouter from './src/routes/audits.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -15,16 +16,17 @@ const PORT = process.env.PORT || 8000;
 // Middleware
 app.use(express.json());
 
-// Initialize data
+// Initialize voting system data
 initializeData();
 
-// Routes
-app.use('/api/members', membersRouter);
-app.use('/api/books', booksRouter);
-app.use('/api/borrow', borrowRouter);
-app.use('/api/return', returnRouter);
-app.use('/api', libraryRouter); // This handles /api/borrowed and /api/overdue
-app.use('/api/reservations', reservationsRouter);
+// Voting system routes
+app.use('/api/voters', votersRouter);
+app.use('/api/candidates', candidatesRouter);
+app.use('/api/votes', votesRouter);
+app.use('/api/results', resultsRouter);
+app.use('/api/ballots', ballotsRouter);
+app.use('/api/analytics', analyticsRouter);
+app.use('/api/audits', auditsRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -34,20 +36,23 @@ app.get('/health', (req, res) => {
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Library Management API',
+    message: 'Voting System API',
     version: '1.0.0',
+    description: 'HackTheAI Mock Preliminary - Voting System Implementation',
     endpoints: {
-      members: '/api/members',
-      books: '/api/books',
-      borrow: '/api/borrow',
-      return: '/api/return',
-      borrowed: '/api/borrowed',
-      overdue: '/api/overdue',
-      reservations: '/api/reservations'
-    }
+      voters: '/api/voters',
+      candidates: '/api/candidates',
+      votes: '/api/votes',
+      results: '/api/results',
+      ballots: '/api/ballots',
+      analytics: '/api/analytics',
+      audits: '/api/audits'
+    },
+    problems_implemented: 20
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Voting System API running on port ${PORT}`);
+  console.log(`Visit http://localhost:${PORT} for API information`);
 });

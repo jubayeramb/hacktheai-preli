@@ -1,7 +1,7 @@
 {
-  "name": "library-api-express",
+  "name": "voting-system-api-express",
   "version": "1.0.0",
-  "description": "Simple library member API with Express",
+  "description": "Comprehensive voting system API with Express - Supporting 20 endpoint requirements for HackTheAI",
   "type": "module",
   "main": "server.js",
   "scripts": {
