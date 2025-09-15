@@ -10,25 +10,27 @@ const router = express.Router();
 // POST /api/voters
 router.post('/', (req, res) => {
   try {
-    const { name, age } = req.body;
+    const { voter_id, name, age } = req.body;
 
     // Validation
+    if (voter_id === undefined || typeof voter_id !== 'number') {
+      return res.status(400).json({ message: "voter_id required and must be number" });
+    }
+
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return res.status(400).json({ message: "name required and must be non-empty string" });
     }
 
     if (!age || typeof age !== 'number' || age < 18) {
-      return res.status(400).json({ message: "age required and must be >= 18" });
+      return res.status(400).json({ message: `invalid age: ${age}, must be 18 or older` });
     }
 
-    // Check if voter already exists (by name - simple duplicate check)
-    const existingVoter = Array.from(voters.values()).find(v => v.name === name.trim());
-    if (existingVoter) {
-      return res.status(409).json({ message: "voter already exists" });
+    // Check if voter already exists
+    if (voters.has(voter_id)) {
+      return res.status(409).json({ message: `voter with id: ${voter_id} already exists` });
     }
 
     // Create new voter
-    const voter_id = generateVoterId();
     const newVoter = {
       voter_id,
       name: name.trim(),
@@ -40,9 +42,11 @@ router.post('/', (req, res) => {
 
     voters.set(voter_id, newVoter);
 
-    res.status(221).json({
+    res.status(218).json({
       voter_id,
-      message: "voter registered successfully"
+      name: newVoter.name,
+      age: newVoter.age,
+      has_voted: newVoter.has_voted
     });
   } catch (error) {
     res.status(500).json({ message: "internal server error" });
@@ -61,7 +65,7 @@ router.get('/:id', (req, res) => {
 
     const voter = voters.get(voter_id);
     if (!voter) {
-      return res.status(404).json({ message: "voter not found" });
+      return res.status(417).json({ message: `voter with id: ${voter_id} was not found` });
     }
 
     res.status(222).json({
@@ -75,7 +79,25 @@ router.get('/:id', (req, res) => {
   }
 });
 
-// Q3: Update voter profile
+// Q3: List all voters
+// GET /api/voters
+router.get('/', (req, res) => {
+  try {
+    const allVoters = Array.from(voters.values()).map(voter => ({
+      voter_id: voter.voter_id,
+      name: voter.name,
+      age: voter.age
+    }));
+
+    res.status(223).json({
+      voters: allVoters
+    });
+  } catch (error) {
+    res.status(500).json({ message: "internal server error" });
+  }
+});
+
+// Q4: Update voter profile
 // PUT /api/voters/{id}
 router.put('/:id', (req, res) => {
   try {
@@ -88,7 +110,7 @@ router.put('/:id', (req, res) => {
 
     const voter = voters.get(voter_id);
     if (!voter) {
-      return res.status(404).json({ message: "voter not found" });
+      return res.status(417).json({ message: `voter with id: ${voter_id} was not found` });
     }
 
     if (voter.has_voted) {
@@ -105,7 +127,7 @@ router.put('/:id', (req, res) => {
 
     if (age !== undefined) {
       if (typeof age !== 'number' || age < 18) {
-        return res.status(400).json({ message: "age must be >= 18" });
+        return res.status(422).json({ message: `invalid age: ${age}, must be 18 or older` });
       }
       voter.age = age;
     }
@@ -113,7 +135,7 @@ router.put('/:id', (req, res) => {
     // Mark profile as updated
     voter.profile_updated = true;
 
-    res.status(223).json({
+    res.status(224).json({
       voter_id: voter.voter_id,
       name: voter.name,
       age: voter.age,
@@ -124,7 +146,7 @@ router.put('/:id', (req, res) => {
   }
 });
 
-// Q4: Delete voter
+// Q5: Delete voter (this was Q4 before)
 // DELETE /api/voters/{id}
 router.delete('/:id', (req, res) => {
   try {
@@ -136,7 +158,7 @@ router.delete('/:id', (req, res) => {
 
     const voter = voters.get(voter_id);
     if (!voter) {
-      return res.status(404).json({ message: "voter not found" });
+      return res.status(417).json({ message: `voter with id: ${voter_id} was not found` });
     }
 
     if (voter.has_voted) {
@@ -145,8 +167,8 @@ router.delete('/:id', (req, res) => {
 
     voters.delete(voter_id);
 
-    res.status(224).json({
-      message: "voter deleted successfully"
+    res.status(225).json({
+      message: `voter with id: ${voter_id} deleted successfully`
     });
   } catch (error) {
     res.status(500).json({ message: "internal server error" });

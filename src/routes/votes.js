@@ -38,7 +38,7 @@ router.post('/', (req, res) => {
 
     // Check if voter has already voted
     if (voter.has_voted) {
-      return res.status(426).json({ message: "voter has already voted" });
+      return res.status(423).json({ message: `voter with id: ${voter_id} has already voted` });
     }
 
     // Create the vote
@@ -69,32 +69,6 @@ router.post('/', (req, res) => {
       voter_id,
       candidate_id,
       timestamp
-    });
-  } catch (error) {
-    res.status(500).json({ message: "internal server error" });
-  }
-});
-
-// Q9: Get vote details
-// GET /api/votes/{id}
-router.get('/:id', (req, res) => {
-  try {
-    const vote_id = parseInt(req.params.id);
-
-    if (!vote_id || isNaN(vote_id)) {
-      return res.status(400).json({ message: "invalid vote ID" });
-    }
-
-    const vote = votes.get(vote_id);
-    if (!vote) {
-      return res.status(404).json({ message: "vote not found" });
-    }
-
-    res.status(229).json({
-      vote_id: vote.vote_id,
-      voter_id: vote.voter_id,
-      candidate_id: vote.candidate_id,
-      timestamp: vote.timestamp
     });
   } catch (error) {
     res.status(500).json({ message: "internal server error" });
@@ -164,7 +138,7 @@ router.post('/weighted', (req, res) => {
 
     // Check if voter has already voted
     if (voter.has_voted) {
-      return res.status(426).json({ message: "voter has already voted" });
+      return res.status(423).json({ message: `voter with id: ${voter_id} has already voted` });
     }
 
     // Determine vote weight based on profile update status
