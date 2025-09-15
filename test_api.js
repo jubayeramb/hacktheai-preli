@@ -73,44 +73,33 @@ function runTest(testName, testFn) {
 }
 
 async function testAPI() {
-  console.log('🚀 Starting Library Management API Tests...\n');
+  console.log('🚀 Starting Voting System API Tests...\n');
   console.log('=' .repeat(50));
 
-  // Test 1: Health Check
-  await runTest('Health Check', async () => {
-    const response = await makeRequest('GET', '/health');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    if (!response.data.status || response.data.status !== 'OK') {
-      throw new Error('Health check failed');
-    }
-  });
-
-  // Test 2: Create Member (Problem 1)
-  await runTest('Create Member - Success', async () => {
-    const memberData = {
-      member_id: 1,
+  // Test 1: Create Voter (Q1)
+  await runTest('Create Voter - Success', async () => {
+    const voterData = {
+      voter_id: 1,
       name: "Alice",
       age: 22
     };
-    const response = await makeRequest('POST', '/api/members', memberData);
-    if (response.status !== 201) {
-      throw new Error(`Expected status 201, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/voters', voterData);
+    if (response.status !== 218) {
+      throw new Error(`Expected status 218, got ${response.status}`);
     }
-    if (response.data.member_id !== 1 || response.data.name !== "Alice") {
-      throw new Error('Member data mismatch');
+    if (response.data.voter_id !== 1 || response.data.name !== "Alice" || !('has_voted' in response.data)) {
+      throw new Error('Voter data mismatch');
     }
   });
 
-  // Test 3: Create Member - Duplicate ID
-  await runTest('Create Member - Duplicate ID', async () => {
-    const memberData = {
-      member_id: 1,
+  // Test 2: Create Voter - Duplicate ID
+  await runTest('Create Voter - Duplicate ID', async () => {
+    const voterData = {
+      voter_id: 1,
       name: "Bob",
       age: 30
     };
-    const response = await makeRequest('POST', '/api/members', memberData);
+    const response = await makeRequest('POST', '/api/voters', voterData);
     if (response.status !== 409) {
       throw new Error(`Expected status 409, got ${response.status}`);
     }
@@ -119,364 +108,356 @@ async function testAPI() {
     }
   });
 
-  // Test 4: Get Member Info (Problem 2)
-  await runTest('Get Member Info - Success', async () => {
-    const response = await makeRequest('GET', '/api/members/1');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
+  // Test 3: Get Voter Info (Q2)
+  await runTest('Get Voter Info - Success', async () => {
+    const response = await makeRequest('GET', '/api/voters/1');
+    if (response.status !== 222) {
+      throw new Error(`Expected status 222, got ${response.status}`);
     }
-    if (response.data.member_id !== 1 || response.data.name !== "Alice") {
-      throw new Error('Member data mismatch');
+    if (response.data.voter_id !== 1 || response.data.name !== "Alice") {
+      throw new Error('Voter data mismatch');
     }
   });
 
-  // Test 5: Get Member Info - Not Found
-  await runTest('Get Member Info - Not Found', async () => {
-    const response = await makeRequest('GET', '/api/members/999');
-    if (response.status !== 404) {
-      throw new Error(`Expected status 404, got ${response.status}`);
+  // Test 4: Get Voter Info - Not Found
+  await runTest('Get Voter Info - Not Found', async () => {
+    const response = await makeRequest('GET', '/api/voters/999');
+    if (response.status !== 417) {
+      throw new Error(`Expected status 417, got ${response.status}`);
     }
     if (!response.data.message.includes('was not found')) {
       throw new Error('Expected not found error message');
     }
   });
 
-  // Test 6: Create another member for testing
-  await runTest('Create Second Member', async () => {
-    const memberData = {
-      member_id: 2,
+  // Test 5: Create another voter for testing
+  await runTest('Create Second Voter', async () => {
+    const voterData = {
+      voter_id: 2,
       name: "Bob",
       age: 30
     };
-    const response = await makeRequest('POST', '/api/members', memberData);
-    if (response.status !== 201) {
-      throw new Error(`Expected status 201, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/voters', voterData);
+    if (response.status !== 218) {
+      throw new Error(`Expected status 218, got ${response.status}`);
     }
   });
 
-  // Test 7: List All Members (Problem 3)
-  await runTest('List All Members', async () => {
-    const response = await makeRequest('GET', '/api/members');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
+  // Test 6: List All Voters (Q3)
+  await runTest('List All Voters', async () => {
+    const response = await makeRequest('GET', '/api/voters');
+    if (response.status !== 223) {
+      throw new Error(`Expected status 223, got ${response.status}`);
     }
-    if (!response.data.members || response.data.members.length < 2) {
-      throw new Error('Expected at least 2 members');
+    if (!response.data.voters || response.data.voters.length < 2) {
+      throw new Error('Expected at least 2 voters');
     }
   });
 
-  // Test 8: Update Member Info (Problem 4)
-  await runTest('Update Member Info - Success', async () => {
+  // Test 7: Update Voter Info (Q4)
+  await runTest('Update Voter Info - Success', async () => {
     const updateData = {
       name: "Alice Smith",
       age: 25
     };
-    const response = await makeRequest('PUT', '/api/members/1', updateData);
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
+    const response = await makeRequest('PUT', '/api/voters/1', updateData);
+    if (response.status !== 224) {
+      throw new Error(`Expected status 224, got ${response.status}`);
     }
     if (response.data.name !== "Alice Smith" || response.data.age !== 25) {
-      throw new Error('Member update failed');
+      throw new Error('Voter update failed');
     }
   });
 
-  // Test 9: Update Member Info - Invalid Age
-  await runTest('Update Member Info - Invalid Age', async () => {
+  // Test 8: Update Voter Info - Invalid Age
+  await runTest('Update Voter Info - Invalid Age', async () => {
     const updateData = {
       name: "Alice Smith",
-      age: 10
+      age: 16
     };
-    const response = await makeRequest('PUT', '/api/members/1', updateData);
-    if (response.status !== 400) {
-      throw new Error(`Expected status 400, got ${response.status}`);
+    const response = await makeRequest('PUT', '/api/voters/1', updateData);
+    if (response.status !== 422) {
+      throw new Error(`Expected status 422, got ${response.status}`);
     }
-    if (!response.data.message.includes('must be 12 or older')) {
+    if (!response.data.message.includes('must be 18 or older')) {
       throw new Error('Expected age validation error');
     }
   });
 
-  // Test 10: Add Book (Problem 11)
-  await runTest('Add Book - Success', async () => {
-    const bookData = {
-      book_id: 201,
-      title: "The Hobbit",
-      author: "J.R.R. Tolkien",
-      isbn: "978-0547928227"
+  // Test 9: Register Candidate (Q6)
+  await runTest('Register Candidate - Success', async () => {
+    const candidateData = {
+      candidate_id: 1,
+      name: "John Doe",
+      party: "Green Party"
     };
-    const response = await makeRequest('POST', '/api/books', bookData);
-    if (response.status !== 201) {
-      throw new Error(`Expected status 201, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/candidates', candidateData);
+    if (response.status !== 226) {
+      throw new Error(`Expected status 226, got ${response.status}`);
     }
-    if (response.data.book_id !== 201 || response.data.title !== "The Hobbit") {
-      throw new Error('Book data mismatch');
+    if (response.data.candidate_id !== 1 || response.data.name !== "John Doe") {
+      throw new Error('Candidate data mismatch');
     }
   });
 
-  // Test 11: Add Book - Duplicate ID
-  await runTest('Add Book - Duplicate ID', async () => {
-    const bookData = {
-      book_id: 201,
-      title: "Another Book",
-      author: "Another Author",
-      isbn: "978-1234567890"
+  // Test 10: List Candidates (Q7)
+  await runTest('List Candidates', async () => {
+    const response = await makeRequest('GET', '/api/candidates');
+    if (response.status !== 227) {
+      throw new Error(`Expected status 227, got ${response.status}`);
+    }
+    if (!response.data.candidates || response.data.candidates.length === 0) {
+      throw new Error('Expected candidates array');
+    }
+  });
+
+  // Test 11: Cast Vote (Q8)
+  await runTest('Cast Vote - Success', async () => {
+    const voteData = {
+      voter_id: 1,
+      candidate_id: 1
     };
-    const response = await makeRequest('POST', '/api/books', bookData);
-    if (response.status !== 409) {
-      throw new Error(`Expected status 409, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/votes', voteData);
+    if (response.status !== 228) {
+      throw new Error(`Expected status 228, got ${response.status}`);
     }
-    if (!response.data.message.includes('already exists')) {
-      throw new Error('Expected duplicate error message');
-    }
-  });
-
-  // Test 12: Get Book Info (Problem 12)
-  await runTest('Get Book Info - Success', async () => {
-    const response = await makeRequest('GET', '/api/books/201');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    if (response.data.book_id !== 201 || response.data.title !== "The Hobbit") {
-      throw new Error('Book data mismatch');
+    if (!response.data.vote_id || !response.data.timestamp) {
+      throw new Error('Vote data incomplete');
     }
   });
 
-  // Test 13: Get Book Info - Not Found
-  await runTest('Get Book Info - Not Found', async () => {
-    const response = await makeRequest('GET', '/api/books/999');
-    if (response.status !== 404) {
-      throw new Error(`Expected status 404, got ${response.status}`);
-    }
-    if (!response.data.message.includes('was not found')) {
-      throw new Error('Expected not found error message');
-    }
-  });
-
-  // Test 14: Borrow Book (Problem 5)
-  await runTest('Borrow Book - Success', async () => {
-    const borrowData = {
-      member_id: 1,
-      book_id: 101  // Using existing book from sample data
+  // Test 12: Cast Vote - Already Voted
+  await runTest('Cast Vote - Already Voted', async () => {
+    const voteData = {
+      voter_id: 1,
+      candidate_id: 1
     };
-    const response = await makeRequest('POST', '/api/borrow', borrowData);
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/votes', voteData);
+    if (response.status !== 423) {
+      throw new Error(`Expected status 423, got ${response.status}`);
     }
-    if (!response.data.transaction_id || response.data.status !== "active") {
-      throw new Error('Borrow transaction failed');
+    if (!response.data.message.includes('has already voted')) {
+      throw new Error('Expected already voted error message');
     }
   });
 
-  // Test 15: Borrow Book - Member Already Borrowed
-  await runTest('Borrow Book - Member Already Borrowed', async () => {
-    const borrowData = {
-      member_id: 1,
-      book_id: 102
+  // Test 13: Get Candidate Votes (Q9)
+  await runTest('Get Candidate Votes', async () => {
+    const response = await makeRequest('GET', '/api/candidates/1/votes');
+    if (response.status !== 229) {
+      throw new Error(`Expected status 229, got ${response.status}`);
+    }
+    if (!('votes' in response.data)) {
+      throw new Error('Expected vote count');
+    }
+  });
+
+  // Test 14: Filter Candidates by Party (Q10)
+  await runTest('Filter Candidates by Party', async () => {
+    const response = await makeRequest('GET', '/api/candidates?party=Green%20Party');
+    if (response.status !== 230) {
+      throw new Error(`Expected status 230, got ${response.status}`);
+    }
+    if (!response.data.candidates || response.data.candidates.length === 0) {
+      throw new Error('Expected filtered candidates');
+    }
+  });
+
+  // Test 15: Voting Results (Q11)
+  await runTest('Get Voting Results', async () => {
+    const response = await makeRequest('GET', '/api/results');
+    if (response.status !== 231) {
+      throw new Error(`Expected status 231, got ${response.status}`);
+    }
+    if (!response.data.results) {
+      throw new Error('Expected results array');
+    }
+  });
+
+  // Test 16: Get Winner (Q12)
+  await runTest('Get Winner', async () => {
+    const response = await makeRequest('GET', '/api/results/winner');
+    if (response.status !== 232) {
+      throw new Error(`Expected status 232, got ${response.status}`);
+    }
+    if (!response.data.winners) {
+      throw new Error('Expected winners array');
+    }
+  });
+
+  // Test 17: Vote Timeline (Q13)
+  await runTest('Get Vote Timeline', async () => {
+    const response = await makeRequest('GET', '/api/votes/timeline?candidate_id=1');
+    if (response.status !== 233) {
+      throw new Error(`Expected status 233, got ${response.status}`);
+    }
+    if (!response.data.timeline) {
+      throw new Error('Expected timeline array');
+    }
+  });
+
+  // Test 18: Weighted Vote (Q14)
+  await runTest('Cast Weighted Vote', async () => {
+    const voteData = {
+      voter_id: 2,
+      candidate_id: 1
     };
-    const response = await makeRequest('POST', '/api/borrow', borrowData);
-    if (response.status !== 400) {
-      throw new Error(`Expected status 400, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/votes/weighted', voteData);
+    if (response.status !== 234) {
+      throw new Error(`Expected status 234, got ${response.status}`);
     }
-    if (!response.data.message.includes('already borrowed')) {
-      throw new Error('Expected already borrowed error message');
-    }
-  });
-
-  // Test 16: List Borrowed Books (Problem 7)
-  await runTest('List Borrowed Books', async () => {
-    const response = await makeRequest('GET', '/api/borrowed');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    if (!response.data.borrowed_books || response.data.borrowed_books.length === 0) {
-      throw new Error('Expected at least one borrowed book');
+    if (!response.data.weight) {
+      throw new Error('Expected vote weight');
     }
   });
 
-  // Test 17: Return Book (Problem 6)
-  await runTest('Return Book - Success', async () => {
-    const returnData = {
-      member_id: 1,
-      book_id: 101
+  // Test 19: Range Vote Query (Q15)
+  await runTest('Range Vote Query - Success', async () => {
+    const response = await makeRequest('GET', '/api/votes/range?candidate_id=1&from=2025-09-10T10:00:00Z&to=2025-09-10T12:00:00Z');
+    if (response.status !== 235) {
+      throw new Error(`Expected status 235, got ${response.status}`);
+    }
+    if (!('votes_gained' in response.data)) {
+      throw new Error('Expected votes_gained in response');
+    }
+  });
+
+  // Test 20: Range Vote Query - Invalid Interval
+  await runTest('Range Vote Query - Invalid Interval', async () => {
+    const response = await makeRequest('GET', '/api/votes/range?candidate_id=1&from=2025-09-10T12:00:00Z&to=2025-09-10T10:00:00Z');
+    if (response.status !== 424) {
+      throw new Error(`Expected status 424, got ${response.status}`);
+    }
+    if (!response.data.message.includes('invalid interval')) {
+      throw new Error('Expected invalid interval error message');
+    }
+  });
+
+  // Test 21: Submit Encrypted Ballot (Q16)
+  await runTest('Submit Encrypted Ballot', async () => {
+    const ballotData = {
+      election_id: "nat-2025",
+      ciphertext: "base64(Paillier_or_ElGamal_cipher)",
+      zk_proof: "base64(Groth16_or_Plonk_proof)",
+      voter_pubkey: "hex(P-256)",
+      nullifier: "hex(keccak256(signal))",
+      signature: "base64(Ed25519 signature over payload)"
     };
-    const response = await makeRequest('POST', '/api/return', returnData);
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/ballots/encrypted', ballotData);
+    if (response.status !== 236) {
+      throw new Error(`Expected status 236, got ${response.status}`);
     }
-    if (response.data.status !== "returned") {
-      throw new Error('Return transaction failed');
+    if (!response.data.ballot_id || !response.data.nullifier) {
+      throw new Error('Expected ballot ID and nullifier');
     }
   });
 
-  // Test 18: Return Book - Not Borrowed
-  await runTest('Return Book - Not Borrowed', async () => {
-    const returnData = {
-      member_id: 1,
-      book_id: 102
+  // Test 22: Submit Invalid Encrypted Ballot
+  await runTest('Submit Invalid Encrypted Ballot', async () => {
+    const ballotData = {
+      election_id: "nat-2025",
+      ciphertext: "invalid_cipher",
+      zk_proof: "invalid_proof",
+      voter_pubkey: "invalid_key",
+      nullifier: "invalid_nullifier",
+      signature: "invalid_signature"
     };
-    const response = await makeRequest('POST', '/api/return', returnData);
-    if (response.status !== 400) {
-      throw new Error(`Expected status 400, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/ballots/encrypted', ballotData);
+    if (response.status !== 425) {
+      throw new Error(`Expected status 425, got ${response.status}`);
     }
-    if (!response.data.message.includes('has not borrowed')) {
-      throw new Error('Expected not borrowed error message');
-    }
-  });
-
-  // Test 19: Get Member Borrowing History (Problem 8)
-  await runTest('Get Member Borrowing History', async () => {
-    const response = await makeRequest('GET', '/api/members/1/history');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    if (!response.data.borrowing_history || response.data.borrowing_history.length === 0) {
-      throw new Error('Expected borrowing history');
+    if (!response.data.message.includes('invalid zk proof')) {
+      throw new Error('Expected invalid proof error message');
     }
   });
 
-  // Test 20: Delete Member - With Active Borrowing (should fail)
-  await runTest('Delete Member - Setup Active Borrowing', async () => {
-    // First borrow a book with member 2
-    const borrowData = {
-      member_id: 2,
-      book_id: 102
+  // Test 23: Homomorphic Tally (Q17)
+  await runTest('Compute Homomorphic Tally', async () => {
+    const tallyData = {
+      election_id: "nat-2025",
+      trustee_decrypt_shares: [
+        { trustee_id: "T1", share: "base64(...)", proof: "base64(NIZK)" },
+        { trustee_id: "T3", share: "base64(...)", proof: "base64(NIZK)" },
+        { trustee_id: "T5", share: "base64(...)", proof: "base64(NIZK)" }
+      ]
     };
-    const response = await makeRequest('POST', '/api/borrow', borrowData);
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/results/homomorphic', tallyData);
+    if (response.status !== 237) {
+      throw new Error(`Expected status 237, got ${response.status}`);
+    }
+    if (!response.data.candidate_tallies || !response.data.transparency) {
+      throw new Error('Expected tally results and transparency data');
     }
   });
 
-  await runTest('Delete Member - With Active Borrowing', async () => {
-    const response = await makeRequest('DELETE', '/api/members/2');
-    if (response.status !== 400) {
-      throw new Error(`Expected status 400, got ${response.status}`);
-    }
-    if (!response.data.message.includes('has an active book borrowing')) {
-      throw new Error('Expected active borrowing error message');
-    }
-  });
-
-  // Test 21: Get Overdue Books (Problem 10)
-  await runTest('Get Overdue Books', async () => {
-    const response = await makeRequest('GET', '/api/overdue');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    // This might be empty if no books are overdue
-    if (!response.data.overdue_books) {
-      throw new Error('Expected overdue_books array');
-    }
-  });
-
-  // Test 22: Advanced Book Search (Problem 13)
-  await runTest('Advanced Book Search - Basic Query', async () => {
-    const response = await makeRequest('GET', '/api/books/search?q=great&sort_by=title&limit=10');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    if (!response.data.books || !response.data.pagination) {
-      throw new Error('Expected books array and pagination');
-    }
-  });
-
-  // Test 23: Advanced Book Search - With Analytics
-  await runTest('Advanced Book Search - With Analytics', async () => {
-    const response = await makeRequest('GET', '/api/books/search?q=gatsby&include_analytics=true&min_rating=4.0');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    if (!response.data.analytics || !response.data.suggestions) {
-      throw new Error('Expected analytics and suggestions');
-    }
-  });
-
-  // Test 24: Advanced Book Search - Invalid Date Range
-  await runTest('Advanced Book Search - Invalid Date Range', async () => {
-    const response = await makeRequest('GET', '/api/books/search?published_after=2023-01-01&published_before=2020-01-01');
-    if (response.status !== 400) {
-      throw new Error(`Expected status 400, got ${response.status}`);
-    }
-    if (!response.data.error || response.data.error !== "invalid_query_parameters") {
-      throw new Error('Expected invalid query parameters error');
-    }
-  });
-
-  // Test 25: Complex Reservation System (Problem 14)
-  await runTest('Create Reservation - Success', async () => {
-    const reservationData = {
-      member_id: 1,
-      book_id: 103,
-      reservation_type: "standard",
-      preferred_pickup_date: "2025-09-20T10:00:00Z",
-      max_wait_days: 14,
-      notification_preferences: {
-        email: true,
-        sms: false,
-        push: true
-      }
+  // Test 24: Differential Privacy Analytics (Q18)
+  await runTest('Differential Privacy Analytics', async () => {
+    const queryData = {
+      election_id: "nat-2025",
+      query: {
+        type: "histogram",
+        dimension: "voter_age_bucket",
+        buckets: [ "18-24", "25-34", "35-44", "45-64", "65+" ],
+        filter: { has_voted: true }
+      },
+      epsilon: 0.5,
+      delta: 1e-6
     };
-    const response = await makeRequest('POST', '/api/reservations', reservationData);
-    if (response.status !== 201) {
-      throw new Error(`Expected status 201, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/analytics/dp', queryData);
+    if (response.status !== 238) {
+      throw new Error(`Expected status 238, got ${response.status}`);
     }
-    if (!response.data.reservation_id || !response.data.priority_score) {
-      throw new Error('Expected reservation with ID and priority score');
-    }
-  });
-
-  // Test 26: Delete Book - Currently Borrowed (should fail)
-  await runTest('Delete Book - Currently Borrowed', async () => {
-    const response = await makeRequest('DELETE', '/api/books/102');
-    if (response.status !== 400) {
-      throw new Error(`Expected status 400, got ${response.status}`);
-    }
-    if (!response.data.message.includes('currently borrowed')) {
-      throw new Error('Expected currently borrowed error message');
+    if (!response.data.answer || !response.data.remaining_privacy_budget) {
+      throw new Error('Expected DP results and privacy budget');
     }
   });
 
-  // Test 27: Return book for member 2 and then delete member
-  await runTest('Return Book for Member 2', async () => {
-    const returnData = {
-      member_id: 2,
-      book_id: 102
+  // Test 25: Submit Ranked Choice Ballot (Q19)
+  await runTest('Submit Ranked Choice Ballot', async () => {
+    const rankingData = {
+      election_id: "city-rcv-2025",
+      voter_id: 123,
+      ranking: [3, 1, 2, 5, 4],
+      timestamp: "2025-09-10T10:15:00Z"
     };
-    const response = await makeRequest('POST', '/api/return', returnData);
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
+    const response = await makeRequest('POST', '/api/ballots/ranked', rankingData);
+    if (response.status !== 239) {
+      throw new Error(`Expected status 239, got ${response.status}`);
+    }
+    if (!response.data.ballot_id || !response.data.status) {
+      throw new Error('Expected ballot ID and status');
     }
   });
 
-  // Test 28: Delete Member - Success (Problem 9)
-  await runTest('Delete Member - Success', async () => {
-    const response = await makeRequest('DELETE', '/api/members/2');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
+  // Test 26: Risk-Limiting Audit Plan (Q20)
+  await runTest('Create Risk-Limiting Audit Plan', async () => {
+    const auditData = {
+      election_id: "nat-2025",
+      reported_tallies: [
+        { candidate_id: 1, votes: 40321 },
+        { candidate_id: 2, votes: 39997 }
+      ],
+      risk_limit_alpha: 0.05,
+      audit_type: "ballot_polling",
+      stratification: { counties: ["A","B","C"] }
+    };
+    const response = await makeRequest('POST', '/api/audits/plan', auditData);
+    if (response.status !== 240) {
+      throw new Error(`Expected status 240, got ${response.status}`);
+    }
+    if (!response.data.audit_id || !response.data.sampling_plan) {
+      throw new Error('Expected audit ID and sampling plan');
+    }
+  });
+
+  // Test 27: Delete Voter (Q5)
+  await runTest('Delete Voter - Success', async () => {
+    const response = await makeRequest('DELETE', '/api/voters/2');
+    if (response.status !== 225) {
+      throw new Error(`Expected status 225, got ${response.status}`);
     }
     if (!response.data.message.includes('deleted successfully')) {
       throw new Error('Expected successful deletion message');
-    }
-  });
-
-  // Test 29: Delete Book - Success (Problem 15)
-  await runTest('Delete Book - Success', async () => {
-    const response = await makeRequest('DELETE', '/api/books/201');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    if (!response.data.message.includes('deleted successfully')) {
-      throw new Error('Expected successful deletion message');
-    }
-  });
-
-  // Test 30: Root Endpoint
-  await runTest('Root Endpoint', async () => {
-    const response = await makeRequest('GET', '/');
-    if (response.status !== 200) {
-      throw new Error(`Expected status 200, got ${response.status}`);
-    }
-    if (!response.data.message || !response.data.endpoints) {
-      throw new Error('Expected API info with endpoints');
     }
   });
 
