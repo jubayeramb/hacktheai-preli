@@ -135,12 +135,7 @@ router.put('/:id', (req, res) => {
     // Mark profile as updated
     voter.profile_updated = true;
 
-    res.status(224).json({
-      voter_id: voter.voter_id,
-      name: voter.name,
-      age: voter.age,
-      has_voted: voter.has_voted
-    });
+    res.send();
   } catch (error) {
     res.status(500).json({ message: "internal server error" });
   }
